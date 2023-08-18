@@ -14,7 +14,7 @@
  * Domain Path: /languages
  */
 
- /*
+/*
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -27,48 +27,74 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program. If not, see < http://www.gnu.org/licenses/ >.
- */
+*/
 
-if( ! defined( 'ABSPATH' )) {
-    // die( 'Bla bla bla' );
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	// die( 'Bla bla bla' );
+	exit;
 }
 
 if ( ! class_exists( 'MV_Slider' ) ) {
-    class MV_Slider {
-        function __construct() {
-            $this->define_constants();
+	class MV_Slider {
+		function __construct() {
+			$this->define_constants();
 
-            require_once( MV_SLIDER_PATH . 'post-types/class.mv-slider-cpt.php' );
-            $MV_Slider_Post_Type = new MV_Slider_Post_Type();
-        }
+			add_action( 'admin_menu', array( $this, 'add_menu' ) );
 
-        public function define_constants() {
-            define( 'MV_SLIDER_PATH', plugin_dir_path( __FILE__ ) );
-            define( 'MV_SLIDER_URL', plugin_dir_url( __FILE__ ) );
-            define( 'MV_SLIDER_VERSION', '1.0.0' );
-        }
+			/**
+			 * @context 2-lines
+			 * @group MV_Slider_Post_Type
+			 * @tag custom post type, cpt
+			 * @step 4
+			 *
+			 * Se requiere el archivo donde está creada la clase del Custom
+			 * Post Type y se instancia para ejecutar su constructor.
+			 */
+			require_once( MV_SLIDER_PATH . 'post-types/class.mv-slider-cpt.php' );
+			$MV_Slider_Post_Type = new MV_Slider_Post_Type();
+		}
 
-        public static function activate() {
-            // flush_rewrite_rules();
-            update_option( 'rewrite_rules', '' );
+		public function define_constants() {
+			define( 'MV_SLIDER_PATH', plugin_dir_path( __FILE__ ) );
+			define( 'MV_SLIDER_URL', plugin_dir_url( __FILE__ ) );
+			define( 'MV_SLIDER_VERSION', '1.0.0' );
+		}
 
-        }
+		public static function activate() {
+			// flush_rewrite_rules();
+			update_option( 'rewrite_rules', '' ); // Update permalinks, erasing rewrite_rules's field on database
+		}
 
-        public static function deactivate() {
-            flush_rewrite_rules();
-        }
+		public static function deactivate() {
+			flush_rewrite_rules();
+			unregister_post_type( 'mv-slider' );
+		}
 
-        public static function unistall() {
+		public static function uninstall() {
 
-        }
-    }
+		}
+
+		public function add_menu() {
+			add_menu_page(
+				'MV Slider Options',
+				'MV Slider',
+				'manage_options',
+				'mv_slider_admin',
+				array( $this, 'mv_slider_settings_page' ),
+				'dashicons-images-alt2'
+			);
+		}
+
+		public function mv_slider_settings_page() {
+			echo "This is a test page";
+		}
+	}
 }
 
 if ( class_exists( 'MV_Slider' ) ) {
-    register_activation_hook( __FILE__, array( 'MV_Slider', 'activate' ) );
-    register_deactivation_hook( __FILE__, array( 'MV_Slider', 'deactivate' ) );
-    register_uninstall_hook( __FILE__, array( 'MV_Slider', 'unistall' ) );
+	register_activation_hook( __FILE__, array( 'MV_Slider', 'activate' ) );
+	register_deactivation_hook( __FILE__, array( 'MV_Slider', 'deactivate' ) );
+	register_uninstall_hook( __FILE__, array( 'MV_Slider', 'uninstall' ) );
 
-    $mv_slider = new MV_Slider();
+	$mv_slider = new MV_Slider();
 }
