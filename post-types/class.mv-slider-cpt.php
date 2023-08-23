@@ -47,7 +47,8 @@ if ( ! class_exists( 'MV_Slider_Post_Type' ) ) {
 			 * @tag columns
 			 * @step 2
 			 *
-			 * Se agrega el método al filtro 'manage_[cpt]_posts_columns'
+			 * El nombre de este filtro es único para cada Custom Post Type, el formato es
+ 			 * el siguiente: manage_[cpt]_post_columns
 			 */
 			add_filter( 'manage_mv-slider_posts_columns', array( $this, 'mv_slider_cpt_columns' ) );
 
@@ -56,7 +57,7 @@ if ( ! class_exists( 'MV_Slider_Post_Type' ) ) {
 			 * @tag columns
 			 * @step 4
 			 *
-			 * Agregamos el método para mostrar los valores en las columnas al action
+			 * manage_[cpt]_posts_custom_columns
 			 */
 			add_action( 'manage_mv-slider_posts_custom_column', array( $this, 'mv_slider_custom_columns' ), 10, 2 );
 
@@ -65,7 +66,8 @@ if ( ! class_exists( 'MV_Slider_Post_Type' ) ) {
 			 * @tag columns
 			 * @step 6
 			 *
-			 * Agregamos el método al filter
+			 * Filtro para permitir ordenar asc y des. El formato del nombre es:
+ 			 * manage_edit-[cpt]_sortable_columns
 			 */
 			add_filter( 'manage_edit-mv-slider_sortable_columns', array( $this, 'mv_slider_sortable_columns' ) );
 		}
@@ -94,7 +96,7 @@ if ( ! class_exists( 'MV_Slider_Post_Type' ) ) {
 					'supports' => array( 'title', 'editor', 'thumbnail' ),
 					'hierarchical' => false,
 					'show_ui' => true,
-					'show_in_menu' => true,
+					'show_in_menu' => false,
 					'menu_position' => 5,
 					'show_in_admin_bar' => true,
 					'show_in_nav_menus' => true,
@@ -200,8 +202,8 @@ if ( ! class_exists( 'MV_Slider_Post_Type' ) ) {
 			 * @group MV_Slider_Nonce
 			 * @tag nonce
 			 * @Step 2
-			 *
-			 * Se verifica si existe 'mv_slider_nonce' y luego se verifica.
+			 * Verifica si existe 'mv_slider_nonce' (se definió en un input:hidden
+			 * en views/mv-slider_metabox.php) y luego se verifica si coincide.
 			 */
 			if ( isset( $_POST['mv_slider_nonce'] ) ) {
 				if ( ! wp_verify_nonce( $_POST['mv_slider_nonce'], 'mv_slider_nonce' ) ) {
@@ -211,7 +213,8 @@ if ( ! class_exists( 'MV_Slider_Post_Type' ) ) {
 
 			/**
 			 * Verifica si está activo el autoguardado de WordPress, en caso
-			 * de estarlo, no permite que guarde la información automáticamente.
+			 * de estarlo, no permite que guarde la información automáticamente,
+			 * ya que esto puede implicar un problema de seguridad.
 			 */
 			if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 				return;
