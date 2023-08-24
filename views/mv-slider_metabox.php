@@ -30,7 +30,7 @@ $link_url = get_post_meta( $post->ID, 'mv_slider_link_url', true );
 
     <tr>
         <th>
-            <label for="mv_slider_link_text">Link Text</label>
+            <label for="mv_slider_link_text"><?php esc_html_e( 'Link Text', 'mv-slider' ); ?></label>
         </th>
         <td>
             <input
@@ -45,7 +45,7 @@ $link_url = get_post_meta( $post->ID, 'mv_slider_link_url', true );
     </tr>
     <tr>
         <th>
-            <label for="mv_slider_link_url">Link URL</label>
+            <label for="mv_slider_link_url"><?php esc_html_e( 'Link URL', 'mv-slider' ); ?></label>
         </th>
         <td>
             <input

@@ -38,6 +38,7 @@ if ( ! class_exists( 'MV_Slider' ) ) {
 	class MV_Slider {
 		function __construct() {
 			$this->define_constants();
+			$this->load_textdomain();
 
 			add_action( 'admin_menu', array( $this, 'add_menu' ) );
 
@@ -55,6 +56,12 @@ if ( ! class_exists( 'MV_Slider' ) ) {
 
 			require_once( MV_SLIDER_PATH . 'class.mv-slider-settings.php' );
 			$MV_Slider_Settings = new MV_Slider_Settings();
+
+			require_once( MV_SLIDER_PATH . 'shortcodes/class.mv-slider-shortcode.php' );
+			$MV_Slider_Shortcode = new MV_Slider_Shortcode();
+
+			add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'regsiter_admin_scripts' ) );
 		}
 
 		public function define_constants() {
@@ -75,7 +82,27 @@ if ( ! class_exists( 'MV_Slider' ) ) {
 		}
 
 		public static function uninstall() {
+			delete_option( 'mv_slider_options' );
+			$posts = get_posts(
+				array(
+					'post_type' => 'mv-slider',
+					'number_posts' => -1,
+					'post_status' => 'any'
+				)
+			);
 
+			foreach( $posts as $post ) {
+				wp_delete_post( $post->ID, true );
+			}
+
+		}
+
+		public function load_textdomain() {
+			load_plugin_textdomain(
+				'mv-slider',
+				false,
+				dirname( plugin_basename( __FILE__ ) ) . '/languages/',
+			);
 		}
 
 		public function add_menu() {
@@ -90,8 +117,8 @@ if ( ! class_exists( 'MV_Slider' ) ) {
 
 			add_submenu_page(
 				'mv_slider_admin',
-				'Manage Slides',
-				'Manage Slides',
+				esc_html__( 'Manage Slides', 'mv-slider' ),
+				esc_html__( 'Manage Slides', 'mv-slider' ),
 				'manage_options',
 				'edit.php?post_type=mv-slider',
 				null,
@@ -100,8 +127,8 @@ if ( ! class_exists( 'MV_Slider' ) ) {
 
 			add_submenu_page(
 				'mv_slider_admin',
-				'Add New Slide',
-				'Add New Slide',
+				esc_html__( 'Add New Slide', 'mv-slider' ),
+				esc_html__( 'Add New Slide', 'mv-slider' ),
 				'manage_options',
 				'post-new.php?post_type=mv-slider',
 				null,
@@ -110,8 +137,8 @@ if ( ! class_exists( 'MV_Slider' ) ) {
 
 			add_submenu_page(
 				'mv_slider_admin',
-				'Settings',
-				'Settings',
+				esc_html__( 'Settings', 'mv-slider' ),
+				esc_html__( 'Settings', 'mv-slider' ),
 				'manage_options',
 				'mv_slider_settings',
 				array( $this, 'mv_slider_settings_page' ),
@@ -125,10 +152,29 @@ if ( ! class_exists( 'MV_Slider' ) ) {
 			}
 
 			if ( isset( $_GET['settings-updated'] ) ) {
-				add_settings_error( 'mv_slider_options', 'mv_slider_message', 'Settings Saved Successfully', 'success' );
+				add_settings_error( 'mv_slider_options', 'mv_slider_message', esc_html__( 'Settings Saved Successfully', 'mv-slider' ), 'success' );
 			}
 			settings_errors( 'mv_slider_options' );
 			require( MV_SLIDER_PATH . 'views/settings-page.php' );
+		}
+
+		public function register_scripts() {
+			wp_register_script( 'mv-slider-main-jq', MV_SLIDER_URL . 'vendor/flexslider/jquery.flexslider-min.js', array( 'jquery' ), MV_SLIDER_VERSION, true );
+			wp_register_style( 'mv-slider-main-css', MV_SLIDER_URL . 'vendor/flexslider/flexslider.css', array(), MV_SLIDER_VERSION, 'all' );
+			wp_register_style( 'mv-slider-style-css', MV_SLIDER_URL . 'assets/css/frontend.css', array(), MV_SLIDER_VERSION, 'all' );
+		}
+
+		public static function add_extra_code_to_script() {
+			$show_bullets = isset( MV_Slider_Settings::$options['mv_slider_bullets'] ) && MV_Slider_Settings::$options['mv_slider_bullets'] == 1 ? 'true' : 'false';
+			wp_enqueue_script( 'mv-slider-options-js', MV_SLIDER_URL . 'vendor/flexslider/flexslider.js', array( 'jquery' ), MV_SLIDER_VERSION, true );
+			wp_add_inline_script( 'mv-slider-options-js', 'var SHOW_BULLETS = ' . $show_bullets, 'before' );
+		}
+
+		public function regsiter_admin_scripts() {
+			global $typenow;
+			if ( $typenow == 'mv-slider' ) {
+				wp_enqueue_style( 'mv-slider-admin', MV_SLIDER_URL . 'assets/css/admin.css' );
+			}
 		}
 	}
 }
